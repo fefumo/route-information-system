@@ -1,13 +1,13 @@
-package com.example.serving_web_content;
+package se.ifmo.route_information_system;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ServingWebContentApplication {
+public class RouteInformationSystemApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ServingWebContentApplication.class, args);
+		SpringApplication.run(RouteInformationSystemApplication.class, args);
 	}
 
 }
