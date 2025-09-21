@@ -42,17 +42,6 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-// TODO: change JAVA_HOME to 21 on the server, if doesn't work - put this.
-// java {
-//     // Compile compatibility (works with JDK 21 as the compiler)
-//     sourceCompatibility = JavaVersion.VERSION_17
-//     targetCompatibility = JavaVersion.VERSION_17
-// }
-//
-// tasks.withType(JavaCompile).configureEach {
-//   options.release = 17
-// }
-
 
 tasks.named('bootRun') {
     mustRunAfter 'build'
