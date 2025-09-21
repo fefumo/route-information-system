@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Details</title>
+  <link th:href="@{/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<header th:replace="fragments/navbar :: navbar"></header>
+
+<section id="content">
+  <h1 th:text="'Route #' + ${route.id}"></h1>
+  <ul>
+    <li><b>Name:</b> <span th:text="${route.name}"></span></li>
+    <li><b>Coordinates:</b>
+      <span th:text="${route.coordinates?.x}"></span>,
+      <span th:text="${route.coordinates?.y}"></span>
+    </li>
+    <li><b>From:</b> <span th:text="${route.from != null ? route.from.name : '-'}"></span></li>
+    <li><b>To:</b> <span th:text="${route.to?.name}"></span></li>
+    <li><b>Distance:</b> <span th:text="${route.distance}"></span></li>
+    <li><b>Rating:</b> <span th:text="${route.rating}"></span></li>
+    <li><b>Created:</b> <span th:text="${#dates.format(route.creationDate,'yyyy-MM-dd HH:mm')}"></span></li>
+  </ul>
+
+  <p>
+    <a th:href="@{|/routes/${route.id}/edit|}">Edit</a>
+    <a th:href="@{/routes}">Back to list</a>
+  </p>
+</section>
+</body>
+</html>

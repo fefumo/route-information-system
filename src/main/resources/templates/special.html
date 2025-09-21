@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Special Operations</title>
+  <link th:href="@{/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<header th:replace="fragments/navbar :: navbar"></header>
+
+<div class="flash">
+  <div class="msg ok" th:if="${message}" th:text="${message}"></div>
+  <div class="msg err" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<section id="content">
+  <h1>Special Operations</h1>
+
+  <section>
+    <h3>Delete by exact rating</h3>
+    <form th:action="@{/special/deleteByRating}" method="post">
+      <input type="number" step="0.1" name="rating" required />
+      <button type="submit">Delete</button>
+    </form>
+  </section>
+
+  <section>
+    <h3>Find by name substring</h3>
+    <form th:action="@{/special/findByName}" method="get">
+      <input type="text" name="substring" required />
+      <button type="submit">Search</button>
+    </form>
+    <table th:if="${resultsByName}">
+      <thead><tr><th>ID</th><th>Name</th><th>To</th><th>Distance</th><th>Rating</th></tr></thead>
+      <tbody>
+        <tr th:each="r : ${resultsByName}">
+          <td th:text="${r.id}"></td>
+          <td th:text="${r.name}"></td>
+          <td th:text="${r.to != null ? r.to.name : '-'}"></td>
+          <td th:text="${r.distance}"></td>
+          <td th:text="${r.rating}"></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h3>Find with rating less than</h3>
+    <form th:action="@{/special/findByRatingLess}" method="get">
+      <input type="number" step="0.1" name="value" required />
+      <button type="submit">Search</button>
+    </form>
+    <table th:if="${resultsByRatingLess}">
+      <thead><tr><th>ID</th><th>Name</th><th>Rating</th></tr></thead>
+      <tbody>
+        <tr th:each="r : ${resultsByRatingLess}">
+          <td th:text="${r.id}"></td>
+          <td th:text="${r.name}"></td>
+          <td th:text="${r.rating}"></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h3>Shortest / Longest between locations</h3>
+    <form th:action="@{/special/shortest}" method="get" style="display:inline-block">
+      <input type="number" name="fromId" placeholder="From ID" required />
+      <input type="number" name="toId" placeholder="To ID" required />
+      <button type="submit">Find shortest</button>
+    </form>
+    <form th:action="@{/special/longest}" method="get" style="display:inline-block">
+      <input type="number" name="fromId" placeholder="From ID" required />
+      <input type="number" name="toId" placeholder="To ID" required />
+      <button type="submit">Find longest</button>
+    </form>
+
+    <div th:if="${extremeRoute}">
+      <p>
+        <b th:text="${#strings.ucfirst(extremeType)}">Shortest</b>:
+        <span th:text="${extremeRoute.name}"></span>
+        [id=<span th:text="${extremeRoute.id}"></span>],
+        distance=<span th:text="${extremeRoute.distance}"></span>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h3>Add route between locations</h3>
+    <form th:action="@{/special/addBetween}" method="post">
+      <input type="number" name="fromId" placeholder="From ID (optional)" />
+      <input type="number" name="toId" placeholder="To ID" required />
+      <input type="text" name="name" placeholder="Route name" required />
+      <input type="number" step="0.1" name="coordX" placeholder="Coord X" required />
+      <input type="number" step="0.1" name="coordY" placeholder="Coord Y" required />
+      <input type="number" min="2" name="distance" placeholder="Distance" required />
+      <input type="number" step="0.1" min="0.1" name="rating" placeholder="Rating" required />
+      <button type="submit">Add</button>
+    </form>
+  </section>
+
+  <p><a th:href="@{/routes}">Back to Routes</a></p>
+</section>
+
+</body>
+</html>

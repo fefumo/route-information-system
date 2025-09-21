@@ -1,0 +1,12 @@
+body { font-family: system-ui, sans-serif; margin: 24px; }
+nav a { margin-right: 12px; text-decoration: none; }
+table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+th, td { border: 1px solid #ddd; padding: 8px; }
+thead { background: #f6f6f6; }
+.flash { margin: 10px 0; }
+.msg { padding: 8px; border-radius: 6px; }
+.msg.ok { background: #e8fff0; border: 1px solid #85d6a3; }
+.msg.err { background: #ffecec; border: 1px solid #ff9b9b; }
+.filters label { margin-right: 12px; }
+.buttons { margin-top: 10px; }
+.actions a, .actions form { margin-right: 6px; }

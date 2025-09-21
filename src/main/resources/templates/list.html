@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Routes</title>
+  <link th:href="@{/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<header th:replace="fragments/navbar :: navbar"></header>
+
+<div class="flash">
+  <div class="msg ok" th:if="${message}" th:text="${message}"></div>
+  <div class="msg err" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<section id="content">
+  <h1>Routes</h1>
+
+  <form class="filters" th:action="@{/routes}" method="get">
+    <label>Name:
+      <input type="text" name="name" th:value="${param.name}" />
+    </label>
+    <label>To (destination name):
+      <input type="text" name="to" th:value="${param.to}" />
+    </label>
+    <button type="submit">Filter</button>
+    <a th:href="@{/routes}">Reset</a>
+  </form>
+
+  <div class="sort">
+    Sort:
+    <a th:href="@{/routes(sort='id,asc')}">ID ▲</a> |
+    <a th:href="@{/routes(sort='id,desc')}">ID ▼</a> |
+    <a th:href="@{/routes(sort='name,asc')}">Name ▲</a> |
+    <a th:href="@{/routes(sort='name,desc')}">Name ▼</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Coord X</th><th>Coord Y</th>
+        <th>From</th><th>To</th><th>Distance</th><th>Rating</th><th>Created</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="r : ${routes}">
+        <td th:text="${r.id}"></td>
+        <td th:text="${r.name}"></td>
+        <td th:text="${r.coordinates != null ? r.coordinates.x : ''}"></td>
+        <td th:text="${r.coordinates != null ? r.coordinates.y : ''}"></td>
+        <td th:text="${r.from != null ? r.from.name : '-'}"></td>
+        <td th:text="${r.to != null ? r.to.name : ''}"></td>
+        <td th:text="${r.distance}"></td>
+        <td th:text="${r.rating}"></td>
+        <td th:text="${#dates.format(r.creationDate,'yyyy-MM-dd HH:mm')}"></td>
+        <td class="actions">
+          <a th:href="@{|/routes/${r.id}|}">View</a>
+          <a th:href="@{|/routes/${r.id}/edit|}">Edit</a>
+          <form th:action="@{|/routes/${r.id}/delete|}" method="post" style="display:inline">
+            <button type="submit" onclick="return confirm('Delete route #' + [[${r.id}]] + '?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(routes)}"><td colspan="10">No routes</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pager" th:if="${routes.totalPages > 1}">
+    <span th:text="'Page ' + ${routes.number + 1} + ' of ' + ${routes.totalPages}"></span>
+    <div>
+      <a th:if="${routes.hasPrevious()}"
+         th:href="@{/routes(page=${routes.number - 1},size=${routes.size},sort=${param.sort},name=${param.name},to=${param.to})}">Prev</a>
+      <a th:if="${routes.hasNext()}"
+         th:href="@{/routes(page=${routes.number + 1},size=${routes.size},sort=${param.sort},name=${param.name},to=${param.to})}">Next</a>
+    </div>
+  </div>
+
+  <p><a th:href="@{/routes/new}">Create new Route</a></p>
+</section>
+
+</body>
+</html>
