@@ -1,60 +1,88 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <title th:text="${formTitle}">Route Form</title>
-  <link th:href="@{/style.css}" rel="stylesheet"/>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="${formTitle}">Route Form</title>
+    <link th:href="@{/style.css}" rel="stylesheet" />
+  </head>
+  <body>
+    <header th:insert="~{fragments/navbar :: navbar}"></header>
 
-<header th:replace="fragments/navbar :: navbar"></header>
+    <h1 th:text="${formTitle}">Route Form</h1>
 
-<h1 th:text="${formTitle}">Route Form</h1>
+    <form th:action="${action}" th:object="${route}" method="post" novalidate>
+      <label>Name: <input type="text" th:field="*{name}" required /> </label
+      ><br />
 
-<form th:action="${action}" th:object="${route}" method="post" novalidate>
-  <label>Name:
-    <input type="text" th:field="*{name}" required />
-  </label><br/>
+      <label
+        >Coord X:
+        <input
+          type="number"
+          step="0.1"
+          th:field="*{coordinates.x}"
+          required
+        /> </label
+      ><br />
 
-  <label>Coord X:
-    <input type="number" step="0.1" th:field="*{coordinates.x}" required />
-  </label><br/>
+      <label
+        >Coord Y:
+        <input
+          type="number"
+          step="0.1"
+          th:field="*{coordinates.y}"
+          required
+        /> </label
+      ><br />
 
-  <label>Coord Y:
-    <input type="number" step="0.1" th:field="*{coordinates.y}" required />
-  </label><br/>
+      <label
+        >From location:
+        <select th:field="*{from}">
+          <option
+            th:each="loc : ${locations}"
+            th:value="${loc.id}"
+            th:text="${loc.name}"
+          ></option>
+        </select> </label
+      ><br />
 
-  <label>From location:
-    <select th:field="*{from}">
-        <option value="">— none —</option>
-      <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"></option>
-    </select>
-  </label><br/>
+      <label
+        >To location:
+        <select th:field="*{to}" required>
+          <option
+            th:each="loc : ${locations}"
+            th:value="${loc.id}"
+            th:text="${loc.name}"
+          ></option>
+        </select> </label
+      ><br />
 
-  <label>To location:
-    <select th:field="*{to}" required>
-      <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"></option>
-    </select>
-  </label><br/>
+      <label
+        >Distance:
+        <input type="number" min="2" th:field="*{distance}" required /> </label
+      ><br />
 
-  <label>Distance:
-    <input type="number" min="2" th:field="*{distance}" required />
-  </label><br/>
+      <label
+        >Rating:
+        <input
+          type="number"
+          step="0.1"
+          min="0.1"
+          th:field="*{rating}"
+          required /></label
+      ><br />
 
-  <label>Rating:
-    <input type="number" step="0.1" min="0.1" th:field="*{rating}" required />
-  </label><br/>
+      <button type="submit">Save</button>
+      <a th:href="@{/routes}">Cancel</a>
 
-  <button type="submit">Save</button>
-  <a th:href="@{/routes}">Cancel</a>
-
-  <!-- Validation errors -->
-  <div th:if="${#fields.hasErrors('*')}">
-    <ul>
-      <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
-    </ul>
-  </div>
-</form>
-
-</body>
+      <!-- Validation errors -->
+      <div th:if="${#fields.hasErrors('*')}">
+        <ul>
+          <li th:each="e : ${#fields.detailedErrors('*')}">
+            <strong th:text="${e.fieldName}">field</strong>:
+            <span th:text="${e.message}">message</span>
+          </li>
+        </ul>
+      </div>
+    </form>
+  </body>
 </html>

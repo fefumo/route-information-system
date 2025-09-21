@@ -1,3 +1,6 @@
+TRUNCATE TABLE locatioons RESTART IDENTITY CASCADE;
+TRUNCATE TABLE routs RESTART IDENTITY CASCADE;
+
 INSERT INTO locations (name, x, y) VALUES
   ('Novigrad',          12.5,   7),
   ('Oxenfurt',           9.0,   6),

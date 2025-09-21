@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,6 +21,7 @@ import se.ifmo.route_information_system.model.Coordinates;
 import se.ifmo.route_information_system.model.Route;
 import se.ifmo.route_information_system.repository.LocationRepository;
 import se.ifmo.route_information_system.repository.RouteRepository;
+import se.ifmo.route_information_system.service.RouteSpecs;
 
 @Controller
 @RequestMapping("/routes")
@@ -39,19 +41,31 @@ public class RouteMvcController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false, name = "to") String toName,
+            @RequestParam(required = false) Long fromId,
+            @RequestParam(required = false) Long toId,
             @RequestParam(required = false, defaultValue = "id,asc") String sort) {
 
-        // basic sorting parser "field,dir"
         String[] s = sort.split(",", 2);
         Sort.Direction dir = (s.length == 2 && "desc".equalsIgnoreCase(s[1])) ? Sort.Direction.DESC
                 : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, s[0]));
 
-        // start simple: no filters (you can wire exact-match later)
-        Page<Route> routes = routeRepo.findAll(pageable);
+        Specification<Route> spec = (root, q, cb) -> cb.conjunction();
+        spec = spec.and(RouteSpecs.nameEq(name))
+                .and(RouteSpecs.fromIdEq(fromId))
+                .and(RouteSpecs.toIdEq(toId));
+
+        Page<Route> routes = routeRepo.findAll(spec, pageable);
 
         model.addAttribute("routes", routes);
+        model.addAttribute("locations", locationRepo.findAll());
+
+        model.addAttribute("name", name);
+        model.addAttribute("fromId", fromId);
+        model.addAttribute("toId", toId);
+
+        model.addAttribute("sort", sort);
+
         return "list";
     }
 
@@ -74,12 +88,25 @@ public class RouteMvcController {
             BindingResult binding,
             Model model,
             RedirectAttributes attrs) {
+
+        var from = route.getFrom();
+        var to = route.getTo();
+        Long fromId = (from != null ? from.getId() : null);
+        Long toId = (to != null ? to.getId() : null);
+
+        if (fromId != null && toId != null && java.util.Objects.equals(fromId, toId)) {
+            // attach to a field so Thymeleaf shows it near the select
+            binding.rejectValue("to", "route.sameLocations",
+                    "From and To locations must be different");
+        }
+
         if (binding.hasErrors()) {
             model.addAttribute("locations", locationRepo.findAll());
             model.addAttribute("formTitle", "Create Route");
             model.addAttribute("action", "/routes");
-            return "form";
+            return "form"; // return the view (no redirect) so errors are kept
         }
+
         routeRepo.save(route);
         attrs.addFlashAttribute("message", "Route created.");
         return "redirect:/routes";

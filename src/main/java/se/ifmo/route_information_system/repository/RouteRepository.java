@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import se.ifmo.route_information_system.model.Route;
 
 // Spring creates all the CRUD code automatically
-public interface RouteRepository extends JpaRepository<Route, Long> {
+public interface RouteRepository extends JpaRepository<Route, Long>, JpaSpecificationExecutor<Route> {
 
     long deleteByRating(float rating);
 

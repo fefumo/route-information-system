@@ -1,21 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title th:text="${pageTitle} ?: 'Routes'">Routes</title>
-  <link th:href="@{/style.css}" rel="stylesheet"/>
-</head>
-<body>
-  <header th:replace="fragments/navbar :: navbar"></header>
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="${pageTitle} ?: 'Routes'">Routes</title>
+    <link th:href="@{/style.css}" rel="stylesheet" />
+  </head>
+  <body>
+    <header th:insert="~{fragments/navbar :: navbar}"></header>
 
-  <!-- flash messages -->
-  <div class="flash">
-    <div class="msg ok" th:if="${message}" th:text="${message}"></div>
-    <div class="msg err" th:if="${error}" th:text="${error}"></div>
-  </div>
+    <!-- flash messages -->
+    <div class="flash">
+      <div class="msg ok" th:if="${message}" th:text="${message}"></div>
+      <div class="msg err" th:if="${error}" th:text="${error}"></div>
+    </div>
 
-  <main>
-    <div th:insert="${content}"></div>
-  </main>
-</body>
+    <main>
+      <div th:insert="${content}"></div>
+    </main>
+  </body>
 </html>

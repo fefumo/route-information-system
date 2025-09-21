@@ -52,3 +52,15 @@ tasks.named('test') {
 // tasks.withType(JavaCompile).configureEach {
 //   options.release = 17
 // }
+
+
+tasks.named('bootRun') {
+    mustRunAfter 'build'
+}
+
+tasks.register('buildAndRun') {
+    group = 'application'
+    description = 'Builds the project, then runs it via bootRun.'
+    dependsOn 'build', 'bootRun'
+}
+
