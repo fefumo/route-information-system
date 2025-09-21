@@ -4,9 +4,14 @@
     <meta charset="UTF-8" />
     <title>Special Operations</title>
     <link th:href="@{/style.css}" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body>
-    <header th:insert="~{fragments/navbar :: navbar}"></header>
+    <!-- keep active flag for navbar styling (no heavy expressions) -->
+    <header
+      th:with="active='special'"
+      th:insert="~{fragments/navbar :: navbar}"
+    ></header>
 
     <div class="flash">
       <div class="msg ok" th:if="${message}" th:text="${message}"></div>
@@ -16,21 +21,39 @@
     <section id="content">
       <h1>Special Operations</h1>
 
-      <section>
+      <!-- Delete by exact rating -->
+      <section class="special-ops-section">
         <h3>Delete by exact rating</h3>
         <form th:action="@{/special/deleteByRating}" method="post">
-          <input type="number" step="0.1" name="rating" required />
-          <button type="submit">Delete</button>
+          <!-- uncomment if you use Spring Security CSRF -->
+          <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> -->
+          <input
+            type="number"
+            step="0.1"
+            name="rating"
+            required
+            placeholder="Enter rating…"
+          />
+          <button type="submit" class="btn-danger">Delete</button>
         </form>
       </section>
 
-      <section>
+      <!-- Find by name substring -->
+      <section class="special-ops-section">
         <h3>Find by name substring</h3>
         <form th:action="@{/special/findByName}" method="get">
-          <input type="text" name="substring" required />
+          <input
+            type="text"
+            name="substring"
+            required
+            placeholder="Enter name substring…"
+          />
           <button type="submit">Search</button>
         </form>
-        <table th:if="${resultsByName}">
+
+        <table
+          th:if="${resultsByName != null and !#lists.isEmpty(resultsByName)}"
+        >
           <thead>
             <tr>
               <th>ID</th>
@@ -52,13 +75,23 @@
         </table>
       </section>
 
-      <section>
+      <!-- Find with rating less than -->
+      <section class="special-ops-section">
         <h3>Find with rating less than</h3>
         <form th:action="@{/special/findByRatingLess}" method="get">
-          <input type="number" step="0.1" name="value" required />
+          <input
+            type="number"
+            step="0.1"
+            name="value"
+            required
+            placeholder="Enter max rating…"
+          />
           <button type="submit">Search</button>
         </form>
-        <table th:if="${resultsByRatingLess}">
+
+        <table
+          th:if="${resultsByRatingLess != null and !#lists.isEmpty(resultsByRatingLess)}"
+        >
           <thead>
             <tr>
               <th>ID</th>
@@ -76,7 +109,8 @@
         </table>
       </section>
 
-      <section>
+      <!-- Shortest / Longest -->
+      <section class="special-ops-section">
         <h3>Shortest / Longest between locations</h3>
         <form
           th:action="@{/special/shortest}"
@@ -90,27 +124,28 @@
         <form
           th:action="@{/special/longest}"
           method="get"
-          style="display: inline-block"
+          style="display: inline-block; margin-left: 0.5rem"
         >
           <input type="number" name="fromId" placeholder="From ID" required />
           <input type="number" name="toId" placeholder="To ID" required />
           <button type="submit">Find longest</button>
         </form>
 
-        <div th:if="${extremeRoute != null}">
+        <div class="extreme-result" th:if="${extremeRoute != null}">
           <p>
-            <b th:text="${extremeType}">Shortest</b>
+            <b th:text="${extremeType ?: 'Shortest'}">Shortest</b>:
             <span th:text="${extremeRoute.name}"></span>
-            [id=<span th:text="${extremeRoute.id}"></span>], distance=<span
-              th:text="${extremeRoute.distance}"
-            ></span>
+            [id=<span th:text="${extremeRoute.id}"></span>], distance=
+            <span th:text="${extremeRoute.distance}"></span> km
           </p>
         </div>
       </section>
 
-      <section>
+      <!-- Add route -->
+      <section class="special-ops-section">
         <h3>Add route between locations</h3>
         <form th:action="@{/special/addBetween}" method="post">
+          <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> -->
           <input type="number" name="fromId" placeholder="From ID (optional)" />
           <input type="number" name="toId" placeholder="To ID" required />
           <input type="text" name="name" placeholder="Route name" required />
@@ -143,11 +178,13 @@
             placeholder="Rating"
             required
           />
-          <button type="submit">Add</button>
+          <button type="submit" class="btn-primary">Add</button>
         </form>
       </section>
 
-      <p><a th:href="@{/routes}">Back to Routes</a></p>
+      <div class="page-actions">
+        <a class="button btn-secondary" th:href="@{/routes}">Back to Routes</a>
+      </div>
     </section>
   </body>
 </html>

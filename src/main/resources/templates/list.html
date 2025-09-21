@@ -6,7 +6,10 @@
     <link th:href="@{/style.css}" rel="stylesheet" />
   </head>
   <body>
-    <header th:insert="~{fragments/navbar :: navbar}"></header>
+    <header
+      th:with="active='routes'"
+      th:insert="~{fragments/navbar :: navbar}"
+    ></header>
 
     <div class="flash">
       <div class="msg ok" th:if="${message}" th:text="${message}"></div>
@@ -21,7 +24,6 @@
           Name:
           <input type="text" name="name" th:value="${name}" />
         </label>
-
         <label>
           From location:
           <select name="fromId">
@@ -34,7 +36,6 @@
             ></option>
           </select>
         </label>
-
         <label>
           To location:
           <select name="toId">
@@ -47,32 +48,38 @@
             ></option>
           </select>
         </label>
-
         <button type="submit">Filter</button>
-        <a th:href="@{/routes}">Reset</a>
+        <a class="button btn-secondary" th:href="@{/routes}">Reset</a>
       </form>
 
-      <div class="sort">
-        Sort:
-        <a
-          th:href="@{/routes(sort='id,asc',   name=${name}, fromId=${fromId}, toId=${toId})}"
-          >ID ▲</a
-        >
-        |
-        <a
-          th:href="@{/routes(sort='id,desc',  name=${name}, fromId=${fromId}, toId=${toId})}"
-          >ID ▼</a
-        >
-        |
-        <a
-          th:href="@{/routes(sort='name,asc', name=${name}, fromId=${fromId}, toId=${toId})}"
-          >Name ▲</a
-        >
-        |
-        <a
-          th:href="@{/routes(sort='name,desc',name=${name}, fromId=${fromId}, toId=${toId})}"
-          >Name ▼</a
-        >
+      <div class="controls-bar">
+        <div class="sort">
+          Sort:
+          <a
+            th:href="@{/routes(sort='id,asc', name=${name}, fromId=${fromId}, toId=${toId})}"
+            >ID ▲</a
+          >
+          |
+          <a
+            th:href="@{/routes(sort='id,desc', name=${name}, fromId=${fromId}, toId=${toId})}"
+            >ID ▼</a
+          >
+          |
+          <a
+            th:href="@{/routes(sort='name,asc', name=${name}, fromId=${fromId}, toId=${toId})}"
+            >Name ▲</a
+          >
+          |
+          <a
+            th:href="@{/routes(sort='name,desc',name=${name}, fromId=${fromId}, toId=${toId})}"
+            >Name ▼</a
+          >
+        </div>
+        <p>
+          <a class="button btn-primary" th:href="@{/routes/new}"
+            >Create new Route</a
+          >
+        </p>
       </div>
 
       <div class="pager" th:if="${routes.totalPages > 1}">
@@ -82,14 +89,12 @@
         <div>
           <a
             th:if="${routes.hasPrevious()}"
-            th:href="@{/routes(page=${routes.number - 1}, size=${routes.size},
-                         sort=${sort}, name=${name}, fromId=${fromId}, toId=${toId})}"
+            th:href="@{/routes(page=${routes.number - 1}, size=${routes.size}, sort=${sort}, name=${name}, fromId=${fromId}, toId=${toId})}"
             >Prev</a
           >
           <a
             th:if="${routes.hasNext()}"
-            th:href="@{/routes(page=${routes.number + 1}, size=${routes.size},
-                         sort=${sort}, name=${name}, fromId=${fromId}, toId=${toId})}"
+            th:href="@{/routes(page=${routes.number + 1}, size=${routes.size}, sort=${sort}, name=${name}, fromId=${fromId}, toId=${toId})}"
             >Next</a
           >
         </div>
@@ -124,16 +129,15 @@
               th:text="${#dates.format(r.creationDate,'yyyy-MM-dd HH:mm')}"
             ></td>
             <td class="actions">
-              <a th:href="@{|/routes/${r.id}|}">View</a>
-              <a th:href="@{|/routes/${r.id}/edit|}">Edit</a>
-              <form
-                th:action="@{|/routes/${r.id}/delete|}"
-                method="post"
-                style="display: inline"
+              <a class="button btn-secondary" th:href="@{|/routes/${r.id}|}"
+                >View</a
               >
+              <a class="button" th:href="@{|/routes/${r.id}/edit|}">Edit</a>
+              <form th:action="@{|/routes/${r.id}/delete|}" method="post">
                 <button
                   type="submit"
-                  onclick="return confirm('Delete route #' + ${r.id} + '?')"
+                  class="btn-danger"
+                  th:onclick="|return confirm('Delete route #${r.id}?')|"
                 >
                   Delete
                 </button>
@@ -141,30 +145,10 @@
             </td>
           </tr>
           <tr th:if="${#lists.isEmpty(routes)}">
-            <td colspan="10">No routes</td>
+            <td colspan="10">No routes found</td>
           </tr>
         </tbody>
       </table>
-
-      <div class="pager" th:if="${routes.totalPages > 1}">
-        <span
-          th:text="'Page ' + ${routes.number + 1} + ' of ' + ${routes.totalPages}"
-        ></span>
-        <div>
-          <a
-            th:if="${routes.hasPrevious()}"
-            th:href="@{/routes(page=${routes.number - 1},size=${routes.size},sort=${param.sort},name=${param.name},to=${param.to})}"
-            >Prev</a
-          >
-          <a
-            th:if="${routes.hasNext()}"
-            th:href="@{/routes(page=${routes.number + 1},size=${routes.size},sort=${param.sort},name=${param.name},to=${param.to})}"
-            >Next</a
-          >
-        </div>
-      </div>
-
-      <p><a th:href="@{/routes/new}">Create new Route</a></p>
     </section>
   </body>
 </html>
