@@ -97,9 +97,9 @@
           <button type="submit">Find longest</button>
         </form>
 
-        <div th:if="${extremeRoute}">
+        <div th:if="${extremeRoute != null}">
           <p>
-            <b th:text="${#strings.ucfirst(extremeType)}">Shortest</b>:
+            <b th:text="${extremeType}">Shortest</b>
             <span th:text="${extremeRoute.name}"></span>
             [id=<span th:text="${extremeRoute.id}"></span>], distance=<span
               th:text="${extremeRoute.distance}"

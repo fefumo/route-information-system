@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import se.ifmo.route_information_system.model.Coordinates;
 import se.ifmo.route_information_system.model.Location;
@@ -119,8 +120,25 @@ public class RouteService {
         routes.deleteById(id);
     }
 
-    public int deleteByRating(float rating) {
-        return (int) routes.deleteByRating(rating);
+    public boolean deleteOneByRating(float rating) {
+        return routes.findFirstByRating(rating)
+                .map(r -> {
+                    routes.deleteById(r.getId());
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Route> findByNameSubstring(String substring) {
+        if (substring == null || substring.isBlank())
+            return List.of();
+        return routes.findByNameContainingIgnoreCase(substring.trim());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Route> findByRatingLess(float value) {
+        return routes.findByRatingLessThan(value);
     }
 
     @Transactional(readOnly = true)
@@ -135,5 +153,45 @@ public class RouteService {
         return routes.findFirstByFrom_IdAndTo_IdOrderByDistanceDesc(fromId, toId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No route found from " + fromId + " to " + toId));
+    }
+
+    public Route addBetween(@Nullable Long fromId,
+            Long toId,
+            String name,
+            double coordX,
+            int coordY,
+            int distance,
+            float rating) {
+
+        Location to = locations.findById(toId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "toId not found: " + toId));
+
+        Location from;
+        if (fromId != null) {
+            from = locations.findById(fromId)
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "fromId not found: " + fromId));
+        } else {
+            // create a new Location for provided coordinates
+            from = new Location();
+            from.setName("L(" + coordX + "," + coordY + ")"); // or any naming rule you like
+            from.setX(coordX);
+            from.setY(coordY);
+            from = locations.save(from);
+        }
+
+        Route r = new Route();
+        r.setName(name);
+
+        Coordinates c = new Coordinates();
+        c.setX((int) coordX);
+        c.setY(coordY);
+        r.setCoordinates(c);
+
+        r.setFrom(from);
+        r.setTo(to);
+        r.setDistance(distance);
+        r.setRating(rating);
+        return routes.save(r);
     }
 }

@@ -11,11 +11,11 @@ import se.ifmo.route_information_system.model.Route;
 // Spring creates all the CRUD code automatically
 public interface RouteRepository extends JpaRepository<Route, Long>, JpaSpecificationExecutor<Route> {
 
-    long deleteByRating(float rating);
-
-    List<Route> findByNameContaining(String substring);
+    List<Route> findByNameContainingIgnoreCase(String substring);
 
     List<Route> findByRatingLessThan(float value);
+
+    Optional<Route> findFirstByRating(float rating);
 
     // find longest
     Optional<Route> findFirstByFrom_IdAndTo_IdOrderByDistanceAsc(Long fromId, Long toId);
