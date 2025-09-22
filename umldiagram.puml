@@ -1,0 +1,139 @@
+@startuml
+class se.ifmo.route_information_system.controller.HomeController {
++ String home()
+}
+
+class se.ifmo.route_information_system.model.Route {
+- Long id
+- String name
+- Coordinates coordinates
+- Date creationDate
+- Location from
+- Location to
+- int distance
+- float rating
+}
+
+class se.ifmo.route_information_system.model.Location {
+- Long id
+- double x
+- int y
+- String name
+}
+
+class se.ifmo.route_information_system.controller.SpecialOperationsController {
+- RouteService routeService
++ String page()
++ String deleteByRating(float,RedirectAttributes)
++ String findByName(String,Model)
++ String findByRatingLess(float,Model)
++ String shortest(Long,Long,Model,RedirectAttributes)
++ String longest(Long,Long,Model,RedirectAttributes)
++ String addBetween(Long,Long,String,double,int,int,float,RedirectAttributes)
+}
+
+
+class se.ifmo.route_information_system.controller.RouteMvcController {
+- RouteService routeService
++ String list(Model,int,int,String,Long,Long,String)
++ String newRoute(Model)
++ String create(Route,BindingResult,Model,RedirectAttributes)
++ String detail(Long,Model)
++ String edit(Long,Model)
++ String update(Long,Route,BindingResult,Model,RedirectAttributes)
++ String delete(Long,RedirectAttributes)
+}
+
+note left of se.ifmo.route_information_system.controller.RouteMvcController::list(Model,int,int,String,Long,Long,String)
+ MAIN PAGE
+end note
+note right of se.ifmo.route_information_system.controller.RouteMvcController::newRoute(Model)
+ SHOW CREATE FORM
+end note
+note left of se.ifmo.route_information_system.controller.RouteMvcController::create(Route,BindingResult,Model,RedirectAttributes)
+ HANDLE CREATE
+end note
+note right of se.ifmo.route_information_system.controller.RouteMvcController::detail(Long,Model)
+ VIEW ONE
+end note
+note left of se.ifmo.route_information_system.controller.RouteMvcController::edit(Long,Model)
+ SHOW EDIT FORM
+end note
+note right of se.ifmo.route_information_system.controller.RouteMvcController::update(Long,Route,BindingResult,Model,RedirectAttributes)
+ HANDLE UPDATE
+end note
+note left of se.ifmo.route_information_system.controller.RouteMvcController::delete(Long,RedirectAttributes)
+ HANDLE DELETE
+end note
+
+class se.ifmo.route_information_system.model.Coordinates {
+- float x
+- double y
+}
+note top of se.ifmo.route_information_system.model.Coordinates
+
+ * Coordinates
+ 
+end note
+
+
+class se.ifmo.route_information_system.service.RouteSpecs {
++ {static} Specification<Route> nameEq(String)
++ {static} Specification<Route> fromIdEq(Long)
++ {static} Specification<Route> toIdEq(Long)
+}
+
+interface se.ifmo.route_information_system.repository.LocationRepository {
+}
+interface se.ifmo.route_information_system.repository.RouteRepository {
+~ List<Route> findByNameContainingIgnoreCase(String)
+~ List<Route> findByRatingLessThan(float)
+~ Optional<Route> findFirstByRating(float)
+~ Optional<Route> findFirstByFrom_IdAndTo_IdOrderByDistanceAsc(Long,Long)
+~ Optional<Route> findFirstByFrom_IdAndTo_IdOrderByDistanceDesc(Long,Long)
+}
+note top of se.ifmo.route_information_system.repository.RouteRepository
+ Spring creates all the CRUD code automatically
+end note
+
+note left of se.ifmo.route_information_system.repository.RouteRepository::findFirstByFrom_IdAndTo_IdOrderByDistanceAsc(Long,Long)
+ find longest
+end note
+note right of se.ifmo.route_information_system.repository.RouteRepository::findFirstByFrom_IdAndTo_IdOrderByDistanceDesc(Long,Long)
+ find shortest
+end note
+
+class se.ifmo.route_information_system.RouteInformationSystemApplication {
++ {static} void main(String[])
+}
+
+class se.ifmo.route_information_system.service.RouteService {
+- {static} Set<String> ALLOWED_SORTS
+- RouteRepository routes
+- LocationRepository locations
++ Page<Route> findRoutes(int,int,String,String,Long,Long)
+- Sort parseSort(String)
++ List<Location> findAllLocations()
++ Route getOr404(Long)
++ Route create(Route)
++ Route addBetween(Long,Long,String,Float,Double,int,float)
++ Route update(Long,Route)
++ void delete(Long)
++ boolean deleteOneByRating(float)
++ List<Route> findByNameSubstring(String)
++ List<Route> findByRatingLess(float)
++ Route findShortest(Long,Long)
++ Route findLongest(Long,Long)
++ Route addBetween(Long,Long,String,double,int,int,float)
+}
+
+note left of se.ifmo.route_information_system.service.RouteService::getOr404(Long)
+ TODO: create a normal 404 maybe?
+end note
+
+
+
+org.springframework.data.jpa.repository.JpaRepository <|-- se.ifmo.route_information_system.repository.LocationRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- se.ifmo.route_information_system.repository.RouteRepository
+org.springframework.data.jpa.repository.JpaSpecificationExecutor <|-- se.ifmo.route_information_system.repository.RouteRepository
+@enduml
