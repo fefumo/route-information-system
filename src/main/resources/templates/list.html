@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Routes</title>
-    <link th:href="@{/style.css}" rel="stylesheet" />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
   </head>
   <body>
     <header
@@ -115,8 +115,8 @@
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr th:each="r : ${routes}">
+        <tbody id="routes-tbody">
+          <tr th:each="r : ${routes}" th:attr="data-id=${r.id}">
             <td th:text="${r.id}"></td>
             <td th:text="${r.name}"></td>
             <td th:text="${r.coordinates != null ? r.coordinates.x : ''}"></td>
@@ -144,11 +144,13 @@
               </form>
             </td>
           </tr>
-          <tr th:if="${#lists.isEmpty(routes)}">
+          <tr th:if="${#lists.isEmpty(routes)}" id="empty-row">
             <td colspan="10">No routes found</td>
           </tr>
         </tbody>
       </table>
     </section>
+
+    <script th:src="@{/js/routes-live.js}"></script>
   </body>
 </html>
