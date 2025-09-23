@@ -23,7 +23,20 @@ public class SpecialOperationsController {
     }
 
     @GetMapping
-    public String page() {
+    public String page(@RequestParam(required = false) Long fromId,
+            @RequestParam(required = false) Long toId,
+            Model model) {
+        // Always provide locations for the dropdowns
+        model.addAttribute("locations", routeService.findAllLocations());
+
+        // Preserve current selections. If flash attributes already set them, don't
+        // overwrite.
+        if (model.getAttribute("fromId") == null) {
+            model.addAttribute("fromId", fromId);
+        }
+        if (model.getAttribute("toId") == null) {
+            model.addAttribute("toId", toId);
+        }
         return "special";
     }
 
@@ -40,35 +53,65 @@ public class SpecialOperationsController {
     @GetMapping("/findByName")
     public String findByName(@RequestParam String substring, Model model) {
         model.addAttribute("resultsByName", routeService.findByNameSubstring(substring));
+        model.addAttribute("locations", routeService.findAllLocations());
         return "special";
     }
 
     @GetMapping("/findByRatingLess")
     public String findByRatingLess(@RequestParam("value") float value, Model model) {
         model.addAttribute("resultsByRatingLess", routeService.findByRatingLess(value));
+        model.addAttribute("locations", routeService.findAllLocations());
         return "special";
     }
 
     @GetMapping("/shortest")
-    public String shortest(@RequestParam Long fromId, @RequestParam Long toId, Model model, RedirectAttributes ra) {
+    public String shortest(@RequestParam Long fromId,
+            @RequestParam Long toId,
+            Model model,
+            RedirectAttributes ra) {
+        if (fromId.equals(toId)) {
+            ra.addFlashAttribute("error", "From and To locations must be different");
+            ra.addFlashAttribute("fromId", fromId);
+            ra.addFlashAttribute("toId", toId);
+            return "redirect:/special";
+        }
         try {
             model.addAttribute("extremeType", "Shortest");
             model.addAttribute("extremeRoute", routeService.findShortest(fromId, toId));
+            model.addAttribute("locations", routeService.findAllLocations());
+            model.addAttribute("fromId", fromId);
+            model.addAttribute("toId", toId);
             return "special";
         } catch (ResponseStatusException e) {
             ra.addFlashAttribute("error", e.getReason());
+            ra.addFlashAttribute("fromId", fromId);
+            ra.addFlashAttribute("toId", toId);
             return "redirect:/special";
         }
     }
 
     @GetMapping("/longest")
-    public String longest(@RequestParam Long fromId, @RequestParam Long toId, Model model, RedirectAttributes ra) {
+    public String longest(@RequestParam Long fromId,
+            @RequestParam Long toId,
+            Model model,
+            RedirectAttributes ra) {
+        if (fromId.equals(toId)) {
+            ra.addFlashAttribute("error", "From and To locations must be different");
+            ra.addFlashAttribute("fromId", fromId);
+            ra.addFlashAttribute("toId", toId);
+            return "redirect:/special";
+        }
         try {
             model.addAttribute("extremeType", "Longest");
             model.addAttribute("extremeRoute", routeService.findLongest(fromId, toId));
+            model.addAttribute("locations", routeService.findAllLocations());
+            model.addAttribute("fromId", fromId);
+            model.addAttribute("toId", toId);
             return "special";
         } catch (ResponseStatusException e) {
             ra.addFlashAttribute("error", e.getReason());
+            ra.addFlashAttribute("fromId", fromId);
+            ra.addFlashAttribute("toId", toId);
             return "redirect:/special";
         }
     }

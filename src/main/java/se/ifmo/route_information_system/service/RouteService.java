@@ -3,6 +3,7 @@ package se.ifmo.route_information_system.service;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
+import se.ifmo.route_information_system.dto.RouteRowDto;
+import se.ifmo.route_information_system.events.RouteChangedEvent;
 import se.ifmo.route_information_system.model.Coordinates;
 import se.ifmo.route_information_system.model.Location;
 import se.ifmo.route_information_system.model.Route;
@@ -26,10 +29,47 @@ public class RouteService {
 
     private final RouteRepository routes;
     private final LocationRepository locations;
+    private final ApplicationEventPublisher events;
 
-    public RouteService(RouteRepository routes, LocationRepository locations) {
+    public RouteService(RouteRepository routes, LocationRepository locations, ApplicationEventPublisher events) {
         this.routes = routes;
         this.locations = locations;
+        this.events = events;
+    }
+
+    private RouteRowDto toRow(Route r) {
+        Integer cx = null, cy = null;
+        if (r.getCoordinates() != null) {
+            Object X = r.getCoordinates().getX();
+            Object Y = r.getCoordinates().getY();
+            if (X instanceof Number nx)
+                cx = nx.intValue();
+            if (Y instanceof Number ny)
+                cy = ny.intValue();
+        }
+
+        Long fromId = (r.getFrom() != null) ? r.getFrom().getId() : null;
+        String fromName = (r.getFrom() != null) ? r.getFrom().getName() : "-";
+
+        Long toId = (r.getTo() != null) ? r.getTo().getId() : null;
+        String toName = (r.getTo() != null) ? r.getTo().getName() : "";
+
+        String created = (r.getCreationDate() != null)
+                ? r.getCreationDate().toInstant().toString()
+                : null;
+
+        return new RouteRowDto(
+                r.getId(),
+                r.getName(),
+                cx,
+                cy,
+                fromId,
+                fromName,
+                toId,
+                toName,
+                r.getDistance(), // Integer in record;
+                r.getRating(), // Float in record;
+                created);
     }
 
     @Transactional(readOnly = true)
@@ -83,7 +123,9 @@ public class RouteService {
     }
 
     public Route create(@Valid Route route) {
-        return routes.save(route);
+        Route saved = routes.save(route);
+        events.publishEvent(new RouteChangedEvent("CREATED", toRow(saved)));
+        return saved;
     }
 
     public Route addBetween(Long fromId, Long toId, String name,
@@ -113,11 +155,28 @@ public class RouteService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         route.setId(id);
-        return routes.save(route);
+        Route saved = routes.save(route);
+        events.publishEvent(new RouteChangedEvent("UPDATED", toRow(saved)));
+        return saved;
     }
 
     public void delete(Long id) {
         routes.deleteById(id);
+        events.publishEvent(
+                new RouteChangedEvent("DELETED",
+                        new RouteRowDto(
+                                id,
+                                null, // name
+                                null, // coordX
+                                null, // coordY
+                                null, // fromId
+                                null, // fromName
+                                null, // toId
+                                null, // toName
+                                null, // distance
+                                null, // rating
+                                null // creationDate
+                        )));
     }
 
     public boolean deleteOneByRating(float rating) {
@@ -174,7 +233,7 @@ public class RouteService {
         } else {
             // create a new Location for provided coordinates
             from = new Location();
-            from.setName("L(" + coordX + "," + coordY + ")"); // or any naming rule you like
+            from.setName("L(" + coordX + "," + coordY + ")");
             from.setX(coordX);
             from.setY(coordY);
             from = locations.save(from);
