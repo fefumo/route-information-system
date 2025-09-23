@@ -3,9 +3,6 @@ package se.ifmo.route_information_system.model;
 import jakarta.validation.constraints.Max;
 import lombok.Data;
 
-/**
- * Coordinates
- */
 @Data
 public class Coordinates {
     @Max(421)

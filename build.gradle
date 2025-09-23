@@ -8,7 +8,12 @@ group = 'se.ifmo'
 version = '0.0.1-SNAPSHOT'
 description = 'Information System laboratory'
 
-// check todo
+// TODO: check if it's actually needed for correct work on a remote server
+// // build.gradle
+// tasks.withType(JavaCompile).configureEach {
+//     options.compilerArgs += ['-parameters', '-Xlint:deprecation', '-Xlint:unchecked']
+// }
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
@@ -30,6 +35,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation "org.springframework.boot:spring-boot-starter-websocket"
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation "org.thymeleaf.extras:thymeleaf-extras-springsecurity6"
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
