@@ -1,0 +1,34 @@
+[
+  {
+    "name": "route from json",
+    "coordinates": { "x": "2.2", "y": "3" },
+    "fromId": 1,
+    "toId": 2,
+    "distance": 50,
+    "rating": 3
+  },
+  {
+    "name": "some route from json",
+    "coordinates": { "x": "2.2", "y": "3" },
+    "fromId": 5,
+    "toId": 3,
+    "distance": 3,
+    "rating": 3
+  },
+  {
+    "name": "another route from json",
+    "coordinates": { "x": "2.2", "y": "3" },
+    "fromId": 5,
+    "toId": 3,
+    "distance": 100,
+    "rating": 3
+  },
+  {
+    "name": "invalid route from json",
+    "coordinates": { "x": "2.2", "y": "3" },
+    "fromId": 1,
+    "toId": 2,
+    "distance": 3,
+    "rating": 3
+  }
+]

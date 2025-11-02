@@ -17,5 +17,6 @@ public class Location {
     private int y;
 
     @NotNull
+    @Column(nullable = false, unique = true)
     private String name;
 }
