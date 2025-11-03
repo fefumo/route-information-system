@@ -526,3 +526,43 @@ header + .auth {
   }
 }
 
+/* Import History */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  line-height: 1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--box-shadow);
+}
+.badge-success {
+  background-color: rgba(40, 167, 69, 0.18);
+  color: #9be0ac;
+}
+.badge-danger {
+  background-color: rgba(220, 53, 69, 0.18);
+  color: #ff9aa7;
+}
+.badge-secondary {
+  background-color: rgba(108, 117, 125, 0.18);
+  color: #c7cdd3;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+.mono {
+  font-family:
+    ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+.muted {
+  color: var(--text-dark);
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-dark);
+  background-color: #252526;
+}

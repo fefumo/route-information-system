@@ -1,0 +1,104 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Import History</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+  </head>
+  <body>
+    <div id="content">
+      <header>
+        <h1>Import history</h1>
+        <p class="muted" th:if="${isAdmin}">
+          Viewing: <strong>all users</strong>
+        </p>
+        <p class="muted" th:unless="${isAdmin}">
+          Viewing: <strong>my operations</strong>
+        </p>
+      </header>
+
+      <div class="controls-bar">
+        <div class="page-actions">
+          <a th:href="@{/routes}" class="btn-secondary">← Back to Routes</a>
+          <a th:href="@{/imports}" class="btn-primary">Refresh</a>
+        </div>
+      </div>
+
+      <section>
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 80px">ID</th>
+              <th style="width: 140px">Status</th>
+              <th>Started by</th>
+              <th>Started at</th>
+              <th>Finished at</th>
+              <th style="width: 140px">Added (success)</th>
+              <th>Error</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:if="${ops.content.isEmpty()}">
+              <td colspan="7" class="empty-state">No operations yet</td>
+            </tr>
+
+            <tr th:each="op : ${ops.content}">
+              <td class="mono" th:text="${op.id}">1</td>
+
+              <td>
+                <span
+                  th:text="${op.status}"
+                  th:class="${'badge ' + (op.status.name() == 'SUCCESS' ? 'badge-success' : (op.status.name() == 'FAILED' ? 'badge-danger' : 'badge-secondary'))}"
+                >
+                  SUCCESS
+                </span>
+              </td>
+
+              <td
+                th:text="${op.startedBy != null ? op.startedBy.username : '-'}"
+              >
+                user
+              </td>
+
+              <td class="nowrap" th:text="${op.startedAt}">
+                2025-10-01T10:00:00Z
+              </td>
+              <td class="nowrap" th:text="${op.finishedAt}">
+                2025-10-01T10:01:00Z
+              </td>
+
+              <td
+                th:text="${op.status.name() == 'SUCCESS'} ? ${op.addedCount} : '-'"
+              >
+                3
+              </td>
+
+              <td
+                th:text="${op.status.name() == 'FAILED'} ? ${op.errorMessage} : '-'"
+              ></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pager" th:if="${ops.totalPages > 1}">
+          <a
+            th:if="${!ops.first}"
+            th:href="@{|/imports?page=${ops.number-1}&size=${ops.size}|}"
+            >&laquo; Prev</a
+          >
+
+          <span>
+            Page <b th:text="${ops.number+1}">1</b> of
+            <b th:text="${ops.totalPages}">5</b>
+          </span>
+
+          <a
+            th:if="${!ops.last}"
+            th:href="@{|/imports?page=${ops.number+1}&size=${ops.size}|}"
+            >Next &raquo;</a
+          >
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

@@ -1,19 +1,25 @@
 package se.ifmo.route_information_system.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import se.ifmo.route_information_system.dto.ImportReport;
 import se.ifmo.route_information_system.dto.RouteImportDto;
 import se.ifmo.route_information_system.model.Coordinates;
+import se.ifmo.route_information_system.model.ImportOperation;
+import se.ifmo.route_information_system.model.ImportStatus;
 import se.ifmo.route_information_system.model.Location;
 import se.ifmo.route_information_system.model.Route;
+import se.ifmo.route_information_system.repository.ImportRepository;
 import se.ifmo.route_information_system.repository.LocationRepository;
 import se.ifmo.route_information_system.repository.RouteRepository;
 
@@ -22,10 +28,23 @@ import se.ifmo.route_information_system.repository.RouteRepository;
 public class ImportService {
     private final RouteRepository routes;
     private final LocationRepository locations;
+    private final ImportRepository importOps;
+    private final UserService users;
+    private final ImportTx importTx;
+    private final Validator validator;
 
-    public ImportService(RouteRepository routes, LocationRepository locations) {
+    public ImportService(RouteRepository routes,
+            LocationRepository locations,
+            ImportRepository importOps,
+            UserService users,
+            ImportTx importTx,
+            Validator validator) {
         this.routes = routes;
         this.locations = locations;
+        this.importOps = importOps;
+        this.users = users;
+        this.importTx = importTx;
+        this.validator = validator;
     }
 
     private Route toEntity(RouteImportDto dto) {
@@ -53,11 +72,11 @@ public class ImportService {
                     () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "fromId no found: " + dto.fromId()));
         } else {
             from = locations.findAll().stream()
-                    .filter(l -> dto.toName().equals(l.getName()))
+                    .filter(l -> dto.fromName().equals(l.getName()))
                     .findFirst()
                     .orElseThrow(
                             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                    "fromId no found: " + dto.fromId()));
+                                    "fromId not found: " + dto.fromId()));
         }
 
         // Build Route
@@ -71,7 +90,6 @@ public class ImportService {
         }
 
         Coordinates c = new Coordinates();
-        // You used float/double in entity; cast carefully:
         c.setX((float) dto.coordinates().x());
         c.setY((double) dto.coordinates().y());
 
@@ -86,21 +104,59 @@ public class ImportService {
 
     }
 
-    @Transactional
-    public ImportReport importRoutes(@Valid List<RouteImportDto> items) {
+    public ImportReport importRoutes(List<RouteImportDto> items) {
+        var currentUser = users.getCurrentUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        ImportOperation op = new ImportOperation();
+        op.setStatus(ImportStatus.RUNNING);
+        op.setStartedBy(currentUser);
+        op.setStartedAt(Instant.now());
+        op = importTx.saveNew(op); // REQUIRES_NEW
+
         List<String> errors = new ArrayList<>();
         List<String> imported = new ArrayList<>();
 
         for (int i = 0; i < items.size(); i++) {
-            RouteImportDto dto = items.get(i);
+            RouteImportDto item = items.get(i);
+
+            var violations = validator.validate(item);
+            if (!violations.isEmpty()) {
+                String msg = violations.stream()
+                        .limit(3)
+                        .map(v -> v.getPropertyPath() + " " + v.getMessage())
+                        .reduce((a, b) -> a + "; " + b)
+                        .orElse("Validation error");
+                errors.add("Item #" + (i + 1) + ": " + msg);
+                continue;
+            }
+
             try {
-                Route r = toEntity(dto);
+                Route r = toEntity(item);
                 routes.save(r);
                 imported.add(r.getName());
+            } catch (jakarta.validation.ConstraintViolationException ve) {
+                String msg = ve.getConstraintViolations().stream()
+                        .limit(3)
+                        .map(v -> v.getPropertyPath() + " " + v.getMessage())
+                        .reduce((a, b) -> a + "; " + b)
+                        .orElse("Constraint violation");
+                errors.add("Item #" + (i + 1) + ": " + msg);
             } catch (Exception e) {
-                errors.add("Item #" + (i + 1) + ":" + e.getMessage());
+                errors.add("Item #" + (i + 1) + ": " + e.getMessage());
             }
         }
-        return new ImportReport(items.size(), imported, errors);
+
+        if (!errors.isEmpty()) {
+            String joined = String.join(" | ", errors);
+            importTx.finish(op, ImportStatus.FAILED, null,
+                    joined.substring(0, Math.min(1000, joined.length())));
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Import aborted: " + errors.size() + " error(s)");
+        }
+
+        importTx.finish(op, ImportStatus.SUCCESS, imported.size(), null);
+        return new ImportReport(items.size(), imported, List.of());
     }
 }
