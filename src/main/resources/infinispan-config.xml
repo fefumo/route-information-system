@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<infinispan xmlns="urn:infinispan:config:15.0">
+    <cache-container name="hibernate">
+        <local-cache name="entity">
+            <encoding media-type="application/x-jboss-marshalling"/>
+        </local-cache>
+        <local-cache name="query">
+            <encoding media-type="application/x-jboss-marshalling"/>
+        </local-cache>
+        <local-cache name="timestamps">
+            <encoding media-type="application/x-jboss-marshalling"/>
+        </local-cache>
+    </cache-container>
+</infinispan>

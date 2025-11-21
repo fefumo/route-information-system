@@ -10,7 +10,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import se.ifmo.route_information_system.dto.ImportReport;
 import se.ifmo.route_information_system.dto.RouteImportDto;

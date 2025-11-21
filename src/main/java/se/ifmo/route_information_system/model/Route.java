@@ -9,9 +9,13 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import java.util.Date;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 @Data
 @Entity
 @Table(name = "routes")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Route {
 
     @Id
