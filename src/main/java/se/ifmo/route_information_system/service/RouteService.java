@@ -114,12 +114,12 @@ public class RouteService {
         return locations.findAll();
     }
 
-    // TODO: create a normal 404 maybe?
     @Transactional(readOnly = true)
     public Route getOr404(Long id) {
         return routes.findById(id).orElseThrow(
-                () -> new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.NOT_FOUND));
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Route with id " + id + " not found"));
     }
 
     public Route create(@Valid Route route) {

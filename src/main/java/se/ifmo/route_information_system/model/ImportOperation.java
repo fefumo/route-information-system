@@ -27,13 +27,22 @@ public class ImportOperation {
     @Column(nullable = false, updatable = false)
     private Instant startedAt = Instant.now();
 
-    /** Устанавливается при SUCCESS или FAILED */
     private Instant finishedAt;
 
-    /** Заполняется только при SUCCESS */
     private Integer addedCount;
 
-    /** Опционально: текст ошибки при FAILED (по желанию) */
     @Column(length = 2000)
     private String errorMessage;
+
+    @Column(name = "source_filename", length = 255)
+    private String sourceFilename;
+
+    @Column(name = "source_object_key", length = 255)
+    private String sourceObjectKey;
+
+    @Column(name = "source_content_type", length = 128)
+    private String sourceContentType;
+
+    @Column(name = "source_size")
+    private Long sourceSize;
 }

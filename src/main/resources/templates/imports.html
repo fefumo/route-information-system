@@ -22,6 +22,19 @@
           <a th:href="@{/routes}" class="btn-secondary">← Back to Routes</a>
           <a th:href="@{/imports}" class="btn-primary">Refresh</a>
         </div>
+
+        <div class="page-actions">
+          <form
+            th:action="@{/imports/upload}"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            <input type="file" name="file" required />
+            <button type="submit" class="btn-primary">
+              Upload &amp; Import
+            </button>
+          </form>
+        </div>
       </div>
 
       <section>
@@ -35,11 +48,12 @@
               <th>Finished at</th>
               <th style="width: 140px">Added (success)</th>
               <th>Error</th>
+              <th style="width: 140px">File</th>
             </tr>
           </thead>
           <tbody>
             <tr th:if="${ops.content.isEmpty()}">
-              <td colspan="7" class="empty-state">No operations yet</td>
+              <td colspan="8" class="empty-state">No operations yet</td>
             </tr>
 
             <tr th:each="op : ${ops.content}">
@@ -60,10 +74,16 @@
                 user
               </td>
 
-              <td class="nowrap" th:text="${op.startedAt}">
+              <td
+                class="nowrap"
+                th:text="${op.startedAt != null} ? ${#temporals.format(op.startedAt, 'dd.MM.yyyy HH:mm:ss')} : '-'"
+              >
                 2025-10-01T10:00:00Z
               </td>
-              <td class="nowrap" th:text="${op.finishedAt}">
+              <td
+                class="nowrap"
+                th:text="${op.finishedAt != null} ? ${#temporals.format(op.finishedAt, 'dd.MM.yyyy HH:mm:ss')} : '-'"
+              >
                 2025-10-01T10:01:00Z
               </td>
 
@@ -75,7 +95,21 @@
 
               <td
                 th:text="${op.status.name() == 'FAILED'} ? ${op.errorMessage} : '-'"
-              ></td>
+              >
+                -
+              </td>
+
+              <td class="nowrap">
+                <a
+                  th:if="${op.sourceObjectKey != null}"
+                  th:href="@{'/imports/' + ${op.id} + '/file'}"
+                >
+                  Download
+                </a>
+                <span th:if="${op.sourceObjectKey == null}" class="muted">
+                  —
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>

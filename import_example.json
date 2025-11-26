@@ -24,7 +24,7 @@
     "rating": 3
   },
   {
-    "name": "invalid route from json",
+    "name": "invalid route from json Aboba",
     "coordinates": { "x": "2.2", "y": "3" },
     "fromId": 1,
     "toId": 2,

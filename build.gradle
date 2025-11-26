@@ -45,6 +45,8 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     runtimeOnly("org.postgresql:postgresql")
     implementation 'org.infinispan:infinispan-hibernate-cache-v62:15.2.6.Final'
+    implementation 'io.minio:minio:8.6.0'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-java8time:3.0.4.RELEASE'
 }
 
 tasks.named('test') {

@@ -1,0 +1,35 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Error</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+  </head>
+  <body>
+    <header
+      th:with="active=''"
+      th:insert="~{fragments/navbar :: navbar}"
+    ></header>
+
+    <div id="content">
+      <h1>Something went wrong</h1>
+
+      <p class="muted">Sorry, an unexpected error has occurred.</p>
+
+      <div class="card">
+        <p><strong>Status:</strong> <span th:text="${status}">500</span></p>
+        <p>
+          <strong>Error:</strong>
+          <span th:text="${error}">Internal Server Error</span>
+        </p>
+        <p><strong>Message:</strong> <span th:text="${message}">N/A</span></p>
+        <p><strong>Path:</strong> <span th:text="${path}">/some/url</span></p>
+      </div>
+
+      <p style="margin-top: 1rem">
+        <a class="button btn-primary" th:href="@{/routes}">Back to Routes</a>
+        <a class="button btn-secondary" th:href="@{/imports}">Go to Imports</a>
+      </p>
+    </div>
+  </body>
+</html>

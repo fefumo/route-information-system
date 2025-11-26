@@ -27,23 +27,24 @@ import se.ifmo.route_information_system.repository.RouteRepository;
 public class ImportService {
     private final RouteRepository routes;
     private final LocationRepository locations;
-    private final ImportRepository importOps;
     private final UserService users;
     private final ImportTx importTx;
     private final Validator validator;
+    private final FileStorageService storage;
 
     public ImportService(RouteRepository routes,
             LocationRepository locations,
             ImportRepository importOps,
             UserService users,
             ImportTx importTx,
-            Validator validator) {
+            Validator validator,
+            FileStorageService storage) {
         this.routes = routes;
         this.locations = locations;
-        this.importOps = importOps;
         this.users = users;
         this.importTx = importTx;
         this.validator = validator;
+        this.storage = storage;
     }
 
     private Route toEntity(RouteImportDto dto) {
@@ -100,7 +101,6 @@ public class ImportService {
         r.setDistance(dto.distance());
         r.setRating(dto.rating());
         return r;
-
     }
 
     public ImportReport importRoutes(List<RouteImportDto> items) {
@@ -113,6 +113,18 @@ public class ImportService {
         op.setStartedAt(Instant.now());
         op = importTx.saveNew(op); // REQUIRES_NEW
 
+        return doImport(op, items);
+    }
+
+    public ImportReport importRoutesForOperation(ImportOperation existingOp,
+            List<RouteImportDto> items) {
+        if (existingOp.getId() == null) {
+            existingOp = importTx.saveNew(existingOp);
+        }
+        return doImport(existingOp, items);
+    }
+
+    private ImportReport doImport(ImportOperation op, List<RouteImportDto> items) {
         List<String> errors = new ArrayList<>();
         List<String> imported = new ArrayList<>();
 
@@ -148,9 +160,14 @@ public class ImportService {
 
         if (!errors.isEmpty()) {
             String joined = String.join(" | ", errors);
+
+            storage.deleteQuietly(op.getSourceObjectKey());
+
             importTx.finish(op, ImportStatus.FAILED, null,
                     joined.substring(0, Math.min(1000, joined.length())));
+
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Import aborted: " + errors.size() + " error(s)");
         }

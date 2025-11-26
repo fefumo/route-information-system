@@ -56,15 +56,29 @@
 
       <div class="controls-bar">
         <!-- Import button -->
-        <button type="button" class="button btn-secondary" id="btn-import-json">
-          Import JSON…
-        </button>
-        <input
-          id="file-import-json"
-          type="file"
-          accept="application/json,.json"
-          hidden
-        />
+        <form
+          id="import-json-form"
+          th:action="@{/imports/upload}"
+          method="post"
+          enctype="multipart/form-data"
+          style="display: inline"
+        >
+          <button
+            type="button"
+            class="button btn-secondary"
+            id="btn-import-json"
+          >
+            Import JSON…
+          </button>
+
+          <input
+            id="file-import-json"
+            type="file"
+            name="file"
+            accept="application/json,.json"
+            hidden
+          />
+        </form>
 
         <div class="sort">
           Sort:
